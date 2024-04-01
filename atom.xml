@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Morino</title>
+  
+  <subtitle>森野</subtitle>
+  <link href="https://blog.morino.top/atom.xml" rel="self"/>
+  
+  <link href="https://blog.morino.top/"/>
+  <updated>2024-04-01T16:05:53.210Z</updated>
+  <id>https://blog.morino.top/</id>
+  
+  <author>
+    <name>morino</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>基于frp的内网穿透</title>
+    <link href="https://blog.morino.top/2023/07/14/%E5%9F%BA%E4%BA%8Efrp%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/"/>
+    <id>https://blog.morino.top/2023/07/14/%E5%9F%BA%E4%BA%8Efrp%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/</id>
+    <published>2023-07-14T14:45:20.000Z</published>
+    <updated>2024-04-01T16:05:53.210Z</updated>
+    
+    <content type="html"><![CDATA[<p>想要搭建自己的网站，如何供外人访问是一个难题。在IPV4大量使用的今天，大部分普通用户都无法直接获取可用的公网IP，所以无法从外网直接访问本地的内容。所以我们可以通过购买中转服务器，利用网络穿透来实现在外网访问本地设备。</p><hr><ul><li><p>前置准备：</p><ul><li>一台具有公网IP的服务器</li></ul></li></ul><p>推荐阿里云的<a href="https://common-buy.aliyun.com/?commodityCode=swas&regionId=ap-southeast-1">轻量应用服务器</a>，亚太新加坡地区docker镜像，一月有1TB流量，只需24元，且绑定域名后无需备案。</p><ul><li><p>基于Docker的FRP内网穿透部署:</p><ul><li>搭建服务器:</li></ul><ol><li><p>创建frps.ini配置文件：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建存放目录</span></span><br><span class="line">sudo <span class="built_in">mkdir</span> /etc/frp</span><br><span class="line"><span class="comment"># 创建frps.ini文件</span></span><br><span class="line">vim /etc/frp/frps.ini</span><br></pre></td></tr></table></figure></li><li><p>编辑frps.ini，内容如下：</p><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="comment"># 监听端口</span></span><br><span class="line"><span class="attr">bind_port</span> = <span class="number">7000</span></span><br><span class="line"><span class="comment"># 面板端口</span></span><br><span class="line"><span class="attr">dashboard_port</span> = <span class="number">7500</span></span><br><span class="line"><span class="comment"># 登录面板账号设置</span></span><br><span class="line"><span class="attr">dashboard_user</span> = [admin] <span class="comment"># 自己设定</span></span><br><span class="line"><span class="attr">dashboard_pwd</span> = [password_1]  <span class="comment"># 自己设定</span></span><br><span class="line"><span class="comment"># 设置http及https协议下代理端口（非重要）</span></span><br><span class="line"><span class="attr">vhost_http_port</span> = <span class="number">7080</span></span><br><span class="line"><span class="attr">vhost_https_port</span> = <span class="number">7081</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 身份验证码</span></span><br><span class="line"><span class="attr">token</span> = [password_2]  <span class="comment"># 自己设定</span></span><br></pre></td></tr></table></figure></li><li><p>运行下述命令，服务器端成功运行：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --restart=always --network host -d -v /etc/frp/frps.ini:/etc/frp/frps.ini --name frps snowdreamtech/frps</span><br></pre></td></tr></table></figure><p>此时服务器端搭建完成，你可以通过服务器的公网IP加上7500端口就可以访问到frp的可视化界面。</p></li></ol></li><li><p>搭建客户端</p><ol><li><p>下载frp客户端：<a href="https://github.com/fatedier/frp/releases">Github releases页面</a>，下载windows版，注意不是darwin版，最新版可能会没有，请下载往期版本</p></li><li><p>编辑frpc.ini文件：</p><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">server_addr</span> = [你的服务器的公网IP]</span><br><span class="line"><span class="attr">server_port</span> = <span class="number">7000</span></span><br><span class="line"><span class="attr">token</span> = [password_2]<span class="comment">#刚设置的身份验证码</span></span><br><span class="line"></span><br><span class="line"><span class="section">[ssh]</span></span><br><span class="line"><span class="attr">type</span> = tcp</span><br><span class="line"><span class="attr">local_ip</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">local_port</span> = <span class="number">7249</span><span class="comment">#本地需要映射的端口号</span></span><br><span class="line"><span class="attr">remote_port</span> = <span class="number">7249</span><span class="comment">#服务器上开放的端口号</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#想要添加端口直接再按该格式添加</span></span><br><span class="line"><span class="comment">#[ssh]</span></span><br><span class="line"><span class="comment">#type = tcp</span></span><br><span class="line"><span class="comment">#local_ip = 127.0.0.1</span></span><br><span class="line"><span class="comment">#local_port = 8096#本地需要映射的端口号</span></span><br><span class="line"><span class="comment">#remote_port = 8096#服务器上开放的端口号</span></span><br></pre></td></tr></table></figure></li><li><p>进入cmd命令行窗口，运行该命令：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">frpc.exe -c frpc.ini</span><br></pre></td></tr></table></figure></li><li><p>访问[你的公网IP]:7050的frp界面的Proxies&#x2F;TCP板块，显示online则为成功，到这里整个流程就结束了，如果有什么问题，欢迎在评论区交流，也可以给我发邮件。</p></li></ol></li></ul><p><div class="note quote"><p>下一个帖子将分享如何用阿里云对象存储OSS或Github来搭建图床，如果感兴趣的话，可以收藏本网站，或者通过RSS订阅。}</p></p></div>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;想要搭建自己的网站，如何供外人访问是一个难题。在IPV4大量使用的今天，大部分普通用户都无法直接获取可用的公网IP，所以无法从外网直接访问本地的内容。所以我们可以通过购买中转服务器，利用网络穿透来实现在外网访问本地设备。&lt;/p&gt;
+&lt;hr&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;前置准备：</summary>
+      
+    
+    
+    
+    <category term="技术分享" scheme="https://blog.morino.top/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/"/>
+    
+    <category term="网络" scheme="https://blog.morino.top/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/%E7%BD%91%E7%BB%9C/"/>
+    
+    
+    <category term="frp" scheme="https://blog.morino.top/tags/frp/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>hello world</title>
+    <link href="https://blog.morino.top/2023/05/27/hello-world/"/>
+    <id>https://blog.morino.top/2023/05/27/hello-world/</id>
+    <published>2023-05-27T11:45:27.000Z</published>
+    <updated>2024-04-01T15:19:19.883Z</updated>
+    
+    <content type="html"><![CDATA[<p>这是这个博客的第一篇帖子，本来想写一下建站的过程，但是其实也就只是套了一下模板，自己原创的内容其实不多，所以还是算了。以后等有时间了，可能会专门写一篇文章来分享这个过程。最开始创建这个博客可能只是为了以后简历上能够多写一点东西，但是创建的过程还挺有意思的，第一次自己公布网站，然后还专门买了域名，其实还挺有成就感的，现阶段还挂载在Github上，以后有机会的话，说不定可以试试自己搭建服务器，或者部署在云服务器上，不过这都是后话了，先把现在要做的事情做好吧，手头上还欠了好几个实验报告呢。</p><p>如果你对我或者我的贴子感兴趣的话，不妨收藏这个网页，抑或是关注我的<a href="https://github.com/TSMorino">Github账号</a>，RSS还在日程上，过一段时间应该就可以正常使用了。(已经可以使用了，请点击侧边栏名字下的<a href="/atom.xml">RSS</a>按钮，就可以看到啦)</p><p><div class="note quote"><p>这里是森野，希望你能在这里找到你自己感兴趣的内容。}</p></p></div>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;这是这个博客的第一篇帖子，本来想写一下建站的过程，但是其实也就只是套了一下模板，自己原创的内容其实不多，所以还是算了。以后等有时间了，可能会专门写一篇文章来分享这个过程。最开始创建这个博客可能只是为了以后简历上能够多写一点东西，但是创建的过程还挺有意思的，第一次自己公布网站</summary>
+      
+    
+    
+    
+    <category term="随笔" scheme="https://blog.morino.top/categories/%E9%9A%8F%E7%AC%94/"/>
+    
+    
+    <category term="随笔" scheme="https://blog.morino.top/tags/%E9%9A%8F%E7%AC%94/"/>
+    
+  </entry>
+  
+</feed>
