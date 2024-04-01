@@ -7067,7 +7067,7 @@ pre {
 @media screen and (max-width: 768px) {
   #l_side .widget >.content {
     max-height: none;
-    background-color: #fff !important;
+    background-color: #fff;
   }
 }
 @media screen and (max-width: 768px) {
@@ -7095,4 +7095,8 @@ pre {
 .gsc-timeline,
 form {
   margin-bottom: 20px;
+}
+[color-scheme='dark'] .content {
+  color: var(--color-p);
+  background-color: #1f1f1f !important;
 }
