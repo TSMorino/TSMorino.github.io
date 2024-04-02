@@ -7100,3 +7100,12 @@ form {
   color: var(--color-p);
   background-color: #1f1f1f !important;
 }
+.markdown>:first-child img {
+  width: 200px !important;
+}
+.aplayer-container {
+  position: absolute !important;
+}
+footer.footer {
+  padding: 40px 10px 50px 10px !important;
+}
